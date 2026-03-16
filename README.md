@@ -12,7 +12,10 @@ https://www.kaggle.com/datasets/lakshmi25npathi/bike-sharing-dataset?select=hour
 ### Description:
 
 This dataset contains the hourly and daily count of rental bikes between the years 2011 and 2012 in the Capital bikeshare system with corresponding weather and seasonal information.
-Volume: 17,379 instances (hourly) / 731 instances (daily).
+
+#### Volume:
+
+17,379 instances (hourly).
 
 ### Variety:
 
