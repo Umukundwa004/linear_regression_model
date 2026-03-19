@@ -1,12 +1,12 @@
-### Summative Mobile App and Regression Analysis
+## Summative Mobile App and Regression Analysis
 
 ### my mission:
 
 Many people traveling in unfamiliar cities often rent bikes to explore efficiently and enjoy unique experiences. I aim to build a machine learning model that predicts hourly bike rental demand based on weather, seasonal patterns, and time-related features. This model will help bike-sharing companies optimize bicycle availability, reduce shortages or overstock, and improve customer satisfaction.
 
-#### data description and source
+### data description and source
 
-### Source:kaggle
+#### Source:kaggle
 
 https://www.kaggle.com/datasets/lakshmi25npathi/bike-sharing-dataset?select=hour.csv
 
