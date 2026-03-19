@@ -1,7 +1,8 @@
 ### Summative Mobile App and Regression Analysis
 
-my mission:
-many people when they are traveling te world they rent bikes so that they not miss anything great mostly when are are not in clouded placed .i choose to build a machine learning model that predicts daily bike rental demand based on weather conditions and seasonal patterns to help bike sharing companies optimize bicycle availability.
+### my mission:
+
+Many people traveling in unfamiliar cities often rent bikes to explore efficiently and enjoy unique experiences. I aim to build a machine learning model that predicts hourly bike rental demand based on weather, seasonal patterns, and time-related features. This model will help bike-sharing companies optimize bicycle availability, reduce shortages or overstock, and improve customer satisfaction.
 
 #### data description and source
 
