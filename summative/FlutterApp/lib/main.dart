@@ -73,7 +73,7 @@ class _BikePredictionPageState extends State<BikePredictionPage> {
       padding: EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(5),
         boxShadow: [
           BoxShadow(
             color: Colors.black12,
@@ -156,12 +156,12 @@ class _BikePredictionPageState extends State<BikePredictionPage> {
         return;
       }
       setState(() {
-        result = "🚴 ${data['predicted_rentals']} rentals";
+        result = "${data['predicted_rentals']} rentals";
       });
 
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text("Prediction successful ✅"),
+          content: Text("Prediction successful"),
           backgroundColor: Colors.green,
         ),
       );
@@ -200,7 +200,7 @@ class _BikePredictionPageState extends State<BikePredictionPage> {
         padding: EdgeInsets.all(16),
         child: Column(
           children: [
-            // 📅 DATE
+            //  DATE
             buildCard(
               child: Row(
                 children: [
@@ -224,7 +224,7 @@ class _BikePredictionPageState extends State<BikePredictionPage> {
               ),
             ),
 
-            // ⏰ HOUR
+            //  HOUR
             buildCard(
               child: Row(
                 children: [
@@ -248,7 +248,7 @@ class _BikePredictionPageState extends State<BikePredictionPage> {
               ),
             ),
 
-            // 🍃 SEASON
+            //  SEASON
             buildCard(
               child: Row(
                 children: [
@@ -273,7 +273,7 @@ class _BikePredictionPageState extends State<BikePredictionPage> {
               ),
             ),
 
-            // 🌦 WEATHER
+            // WEATHER
             buildCard(
               child: Row(
                 children: [
@@ -316,7 +316,7 @@ class _BikePredictionPageState extends State<BikePredictionPage> {
               ),
             ),
 
-            // 🎉 HOLIDAY
+            // HOLIDAY
             buildCard(
               child: SwitchListTile(
                 title: Row(
@@ -333,7 +333,7 @@ class _BikePredictionPageState extends State<BikePredictionPage> {
 
             SizedBox(height: 20),
 
-            // 🔄 BUTTON / LOADING
+            //  BUTTON / LOADING
             AnimatedSwitcher(
               duration: Duration(milliseconds: 300),
               child: isLoading
@@ -349,17 +349,16 @@ class _BikePredictionPageState extends State<BikePredictionPage> {
                         ),
                       ),
                       onPressed: predict,
-                      child: Text("Predict 🚴", style: TextStyle(fontSize: 18)),
+                      child: Text("Predict ", style: TextStyle(fontSize: 18)),
                     ),
             ),
 
-            // 📊 RESULT
+            // RESULT
             if (result.isNotEmpty)
               buildCard(
                 child: Column(
                   children: [
-                    Icon(Icons.directions_bike, size: 40, color: Colors.blue),
-                    SizedBox(height: 10),
+                    SizedBox(height: 10, width: 20),
                     Text(
                       result,
                       textAlign: TextAlign.center,
