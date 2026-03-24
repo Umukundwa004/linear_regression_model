@@ -64,7 +64,7 @@ scaler = safe_joblib_load(current_dir / "scaler.pkl", "scaler")
 
 # Define input validation
 class PredictionData(BaseModel):
-  date: str
+    date: str
     hour: int = Field(..., ge=0, le=23)
     holiday: int = Field(default=0, ge=0, le=1)
     weather: int = Field(..., ge=1, le=4)
