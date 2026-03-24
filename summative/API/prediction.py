@@ -45,8 +45,22 @@ model_path = current_dir / "bike_model.pkl"
 if not model_path.exists():
     model_path = current_dir / "treemodel.pkl"
 
-model = joblib.load(model_path) if model_path.exists() else None
-scaler = joblib.load(current_dir / "scaler.pkl") if (current_dir / "scaler.pkl").exists() else None
+model_load_error = ""
+
+
+def safe_joblib_load(path: Path, label: str):
+    global model_load_error
+    if not path.exists():
+        return None
+    try:
+        return joblib.load(path)
+    except Exception as exc:
+        model_load_error = f"Failed to load {label} from {path.name}: {exc}"
+        return None
+
+
+model = safe_joblib_load(model_path, "model")
+scaler = safe_joblib_load(current_dir / "scaler.pkl", "scaler")
 
 # Define input validation
 class PredictionData(BaseModel):
@@ -151,7 +165,8 @@ def model_info():
     return {
         "model": type(model).__name__ if model else "Not loaded",
         "scaler": type(scaler).__name__ if scaler else "Not loaded",
-        "status": "Ready" if model and scaler else "Error"
+        "status": "Ready" if model and scaler else "Error",
+        "load_error": model_load_error or None,
     }
 
 if __name__ == "__main__":
