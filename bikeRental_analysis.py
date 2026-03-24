@@ -1,0 +1,144 @@
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+import seaborn as sns
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import StandardScaler, LabelEncoder
+from sklearn.linear_model import LinearRegression, SGDRegressor
+from sklearn.tree import DecisionTreeRegressor
+from sklearn.ensemble import RandomForestRegressor
+from sklearn.metrics import mean_squared_error, r2_score
+import joblib
+
+import kagglehub
+
+# Download latest version
+path= kagglehub.dataset_download("lakshmi25npathi/bike-sharing-dataset")
+
+print("Path to dataset files:", path)
+
+import os
+
+df = pd.read_csv(os.path.join(path, 'hour.csv'))
+df.head()
+
+df.info()
+df.describe()
+
+# Dropping 'instant' (ID) and 'dteday' (already have yr/mnth/hr columns)
+# Also dropping 'casual' and 'registered' because they sum up to 'cnt' (target) and for creating new dataframe
+df_clean = df.drop(['instant', 'dteday', 'casual', 'registered'], axis=1)
+
+
+# Visualization 1: Correlation Heatmap
+plt.figure(figsize=(12, 8))
+sns.heatmap(df_clean.corr(), annot=True, cmap='coolwarm', fmt='.2f')
+plt.title("Correlation Heatmap: Factors Affecting Bike Rentals")
+plt.show()
+# Interpretation: 'temp' and 'hr' show high positive correlation with 'cnt'.
+
+# Visualization 2: Hourly distribution of rentals
+plt.figure(figsize=(10, 6))
+sns.histplot(x='hr', y='cnt', data=df)
+plt.title("Average Bike Rentals per Hour (Tourist Peak Times)")
+plt.show()
+
+# Features (X)all columns axcept "cnt" and Target (y) "cnt"
+X = df_clean.drop('cnt', axis=1)
+y = df_clean['cnt']
+
+# Identify categorical columns that are currently integers but should be one-hot encoded
+categorical_cols = ['season', 'yr', 'mnth', 'hr', 'holiday','weekday', 'workingday', 'weathersit', 'temp', 'hum', 'windspeed']
+
+# Apply one-hot encoding to these categorical columns
+X = pd.get_dummies(X, columns=categorical_cols, drop_first=True)
+
+# Splitting data
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, shuffle = True)
+
+# Standardizing the data
+scaler = StandardScaler()
+X_train_scaled = scaler.fit_transform(X_train)
+X_test_scaled = scaler.transform(X_test)
+
+# 1. Linear Regression with Gradient Descent
+model_lr = SGDRegressor(max_iter=1, tol=1e-3, warm_start=True, learning_rate='constant', eta0=0.1)
+train_losses = []
+test_losses = [] # Initialize list to store test losses
+
+# Manual loop to capture loss for the Loss Curve
+for epoch in range(100):
+    model_lr.partial_fit(X_train_scaled, y_train)
+
+    # Calculate training loss
+    y_pred_train = model_lr.predict(X_train_scaled)
+    train_loss = mean_squared_error(y_train, y_pred_train)
+    train_losses.append(train_loss)
+
+    # Calculate test loss
+    y_pred_test = model_lr.predict(X_test_scaled)
+    test_loss = mean_squared_error(y_test, y_pred_test)
+    test_losses.append(test_loss)
+
+# Plot Loss Curve for both train and test data
+plt.figure(figsize=(10, 6))
+plt.plot(train_losses, label='Train Loss')
+plt.plot(test_losses, label='Test Loss')
+plt.title("Gradient Descent Loss Curve")
+plt.xlabel("Epochs")
+plt.ylabel("MSE")
+plt.legend()
+plt.show()
+
+# 2. Decision Tree
+model_decision_tree = DecisionTreeRegressor()
+model_decision_tree.fit(X_train_scaled, y_train)
+
+# 3. Random Forest
+model_random_forest = RandomForestRegressor(n_estimators=100)
+model_random_forest.fit(X_train_scaled, y_train)
+
+# Evaluating models for evaluating th perfomance of trained model
+from sklearn.metrics import mean_absolute_error, r2_score
+
+models = {'Linear': model_lr, 'Decision_Tree': model_decision_tree, 'Random_Forest': model_random_forest}
+results = {}
+
+for name, model in models.items():
+    preds = model.predict(X_test_scaled)
+    mse = mean_squared_error(y_test, preds)
+    mae = mean_absolute_error(y_test, preds)
+    rmse = np.sqrt(mse)
+    r2 = r2_score(y_test, preds)
+
+    results[name] = mse
+    print(f"{name} MSE: {mse:.2f}")
+    print(f"{name} MAE: {mae:.2f}")
+    print(f"{name} RMSE: {rmse:.2f}")
+    print(f"{name} R2: {r2:.2f}")
+    print("---------------------------------")
+
+# Scatter Plot for Linear Regression (Actual vs Predicted)
+plt.scatter(y_test, model_lr.predict(X_test_scaled), alpha=0.3)
+plt.plot([y_test.min(), y_test.max()], [y_test.min(), y_test.max()], '--r', lw=2)
+plt.title("Linear Regression: Actual vs Predicted (Fit Line)")
+plt.xlabel("Actual")
+plt.ylabel("Predicted")
+plt.show()
+
+# Save the Best Model (Usually Random Forest for this dataset)
+best_model_name = min(results, key=results.get)
+joblib.dump(models[best_model_name], 'best_bike_model.pkl')
+print(f"Saved {best_model_name} as the best model.")
+
+# Load model and scaler
+loaded_model = joblib.load('best_bike_model.pkl')
+
+# Use the first row of X_test_scaled as our test point
+single_point = X_test_scaled[0].reshape(1, -1)
+prediction = loaded_model.predict(single_point)
+
+print(f"Input features (Scaled): {single_point}")
+print(f"Predicted Bike Rentals: {round(prediction[0])}")
+print(f"Actual Bike Rentals: {y_test.iloc[0]}")
+

@@ -1,17 +1,44 @@
 from datetime import datetime
+import os
 
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 import joblib
 import numpy as np
 from pathlib import Path
 
-app = FastAPI(title="Bike Rental Prediction API", version="1.0.0")
 current_dir = Path(__file__).parent
 
+
+def load_env_file(env_path: Path) -> None:
+    if not env_path.exists():
+        return
+    for raw_line in env_path.read_text(encoding="utf-8").splitlines():
+        line = raw_line.strip()
+        if not line or line.startswith("#") or "=" not in line:
+            continue
+        key, value = line.split("=", 1)
+        key = key.strip()
+        value = value.strip().strip('"').strip("'")
+        os.environ.setdefault(key, value)
+
+
+load_env_file(current_dir / ".env")
+
+app = FastAPI(title="Bike Rental Prediction API", version="1.0.0")
+
+API_HOST = os.getenv("API_HOST", "0.0.0.0")
+API_PORT = int(os.getenv("API_PORT", "8005"))
+API_KEY = os.getenv("API_KEY", "")
+
+allow_all_origins = os.getenv("ALLOW_ALL_ORIGINS", "true").lower() == "true"
+allowed_origins_env = os.getenv("ALLOWED_ORIGINS", "")
+allowed_origins = [o.strip() for o in allowed_origins_env.split(",") if o.strip()]
+cors_origins = ["*"] if allow_all_origins or not allowed_origins else allowed_origins
+
 # Allow CORS for Flutter app
-app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_methods=["*"], allow_headers=["*"])
+app.add_middleware(CORSMiddleware, allow_origins=cors_origins, allow_methods=["*"], allow_headers=["*"])
 
 # Load model and optional scaler.
 model_path = current_dir / "bike_model.pkl"
@@ -41,9 +68,18 @@ def get_season(month: int) -> int:
         return 3
     return 4
 
+
+def require_api_key(request: Request) -> None:
+    # If API_KEY is empty in .env, auth is disabled for local development.
+    if not API_KEY:
+        return
+    if request.headers.get("x-api-key") != API_KEY:
+        raise HTTPException(status_code=401, detail="Invalid or missing API key")
+
 @app.post("/predict")
-def predict(data: PredictionData):
+def predict(data: PredictionData, request: Request):
     try:
+        require_api_key(request)
         if model is None:
             raise HTTPException(status_code=500, detail="Model not loaded")
 
@@ -80,8 +116,9 @@ def predict(data: PredictionData):
         raise HTTPException(status_code=400, detail=str(e))
 
 @app.post("/predict-batch")
-def predict_batch(batch_data: dict):
+def predict_batch(batch_data: dict, request: Request):
     try:
+        require_api_key(request)
         if model is None:
             raise HTTPException(status_code=500, detail="Model not loaded")
         
@@ -119,4 +156,4 @@ def model_info():
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=8005)
+    uvicorn.run(app, host=API_HOST, port=API_PORT)
