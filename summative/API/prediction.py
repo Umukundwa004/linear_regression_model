@@ -65,12 +65,12 @@ scaler = safe_joblib_load(current_dir / "scaler.pkl", "scaler")
 # Define input validation
 class PredictionData(BaseModel):
     date: str
-    hour: int = Field(..., ge=0, le=23)
+    hour: int
     holiday: int = Field(default=0, ge=0, le=1)
-    weather: int = Field(..., ge=1, le=4)
-    temp: float = Field(..., ge=-10, le=50)
-    humidity: float = Field(..., ge=0, le=100)
-    windspeed: float = Field(..., ge=0, le=50)
+    weather: int
+    temp: float
+    humidity: float
+    windspeed: float
 
 
 def get_season(month: int) -> int:
@@ -90,6 +90,18 @@ def require_api_key(request: Request) -> None:
     if request.headers.get("x-api-key") != API_KEY:
         raise HTTPException(status_code=401, detail="Invalid or missing API key")
 
+
+def preprocess_input(data: dict) -> dict:
+    # Accept wider ranges and normalize to model-friendly values.
+    processed = data.copy()
+    processed["hour"] = int(processed["hour"]) % 24
+    processed["holiday"] = 1 if int(processed.get("holiday", 0)) != 0 else 0
+    processed["weather"] = max(1, min(4, int(processed["weather"])))
+    processed["temp"] = float(processed["temp"]) / 41
+    processed["humidity"] = float(processed["humidity"]) / 100
+    processed["windspeed"] = float(processed["windspeed"]) / 67
+    return processed
+
 @app.post("/predict")
 def predict(data: PredictionData, request: Request):
     try:
@@ -103,19 +115,20 @@ def predict(data: PredictionData, request: Request):
         month = date.month
         year = 1 if date.year >= 2012 else 0
         season = get_season(month)
+        processed = preprocess_input(data.model_dump())
 
         features = np.array([[
             season,
             year,
             month,
-            data.hour,
-            data.holiday,
+            processed["hour"],
+            processed["holiday"],
             weekday,
             workingday,
-            data.weather,
-            data.temp,
-            data.humidity,
-            data.windspeed,
+            processed["weather"],
+            processed["temp"],
+            processed["humidity"],
+            processed["windspeed"],
         ]])
 
         input_features = scaler.transform(features) if scaler is not None else features
@@ -145,9 +158,10 @@ def predict_batch(batch_data: dict, request: Request):
             month = date.month
             year = 1 if date.year >= 2012 else 0
             season = get_season(month)
-            features = np.array([[season, year, month, data.hour, data.holiday,
-                                 weekday, workingday, data.weather,
-                                 data.temp, data.humidity, data.windspeed]])
+            processed = preprocess_input(data.model_dump())
+            features = np.array([[season, year, month, processed["hour"], processed["holiday"],
+                                 weekday, workingday, processed["weather"],
+                                 processed["temp"], processed["humidity"], processed["windspeed"]]])
             input_features = scaler.transform(features) if scaler is not None else features
             pred = model.predict(input_features)[0]
             predictions.append(max(0, pred))
