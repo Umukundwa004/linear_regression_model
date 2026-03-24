@@ -1,6 +1,6 @@
 # Summative - Mobile App Regression Analysis
 
-## Mission (4 lines max)
+## Mission
 
 I built a bike-rental demand predictor for urban mobility planning in tourist-heavy periods.
 The model predicts hourly rental counts using weather, calendar, and time signals.
@@ -14,7 +14,7 @@ The use case is demand optimization for bike-sharing operations, not house-price
 - Volume: 17,379 hourly rows
 - Variety: season, date/time features, holiday/working-day flags, weather, temperature, humidity, wind speed, and rental count target
 
-## Linear Regression Task (Task 1)
+## Linear Regression Task
 
 - Notebook: summative/linear_regression/bike_rental_analysis.ipynb
 - Script version: bikeRental_analysis.py
@@ -68,7 +68,7 @@ The use case is demand optimization for bike-sharing operations, not house-price
 
 - Add your deployed URL here before submission: https://YOUR-RENDER-SERVICE.onrender.com/docs
 
-## Flutter App (Task 3)
+## Flutter App
 
 - App code: summative/FlutterApp/lib/main.dart
 - One-page prediction UI includes:

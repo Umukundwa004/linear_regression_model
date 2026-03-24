@@ -2,6 +2,7 @@
 __pycache__/
 *.pyc
 *.pyo
+*.pyd
 .venv/
 
 # IDE
@@ -20,3 +21,7 @@ pubspec.lock
 
 # Logs
 *.log
+
+# Local environment variables
+.env
+!.env.example
