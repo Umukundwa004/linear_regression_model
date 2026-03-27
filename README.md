@@ -17,7 +17,7 @@ Many people traveling in unfamiliar cities often rent bikes to explore efficient
 
 ## Video Demo 
 
-- YouTube link:https://youtu.be/0huzSbQM8S4
+- YouTube link:https://canva.link/rkck7k3vbbd5uki
 
 ## Repository Structure
 
