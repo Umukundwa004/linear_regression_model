@@ -13,11 +13,11 @@ Many people traveling in unfamiliar cities often rent bikes to explore efficient
 
 ### Public Swagger UI (Render)
 
-- Add your deployed URL here before submission: https://linear-regression-model-peia.onrender.com
+- deployed URL: https://linear-regression-model-peia.onrender.com
 
-## Video Demo (Task 4)
+## Video Demo 
 
-- YouTube link :
+- YouTube link:https://youtu.be/0huzSbQM8S4
 
 ## Repository Structure
 
